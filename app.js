@@ -163,11 +163,20 @@ async function fetchTodayWords() {
   const today = new Date();
   const dateStr = formatDateUTC(today);
 
-  // Official NYT connections endpoint pattern used by the game client.
-  const url = `https://www.nytimes.com/svc/connections/v2/${dateStr}.json`;
-  const response = await fetch(url, { credentials: "omit" });
+  // Use same-origin proxy to avoid browser CORS blocks from NYT.
+  const url = `nyt-proxy.php?date=${encodeURIComponent(dateStr)}`;
+  const response = await fetch(url, { credentials: "same-origin" });
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+    let message = `HTTP ${response.status}`;
+    try {
+      const err = await response.json();
+      if (err?.error) {
+        message = `${message}: ${err.error}`;
+      }
+    } catch (_) {
+      // Keep generic message if response is not JSON.
+    }
+    throw new Error(message);
   }
 
   const data = await response.json();
