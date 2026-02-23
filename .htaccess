@@ -1,0 +1,22 @@
+# Ensure common static types are served correctly.
+AddType application/json .json
+
+# Attempt to explicitly allow PHP endpoint access in this directory.
+<FilesMatch "\.php$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+  </IfModule>
+</FilesMatch>
+
+# Keep app/proxy responses uncached so deploys and daily fetches are immediate.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js|php|json)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
