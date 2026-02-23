@@ -275,31 +275,31 @@ label {
 }
 
 .tile.insert-before {
-  transform: translateY(2px);
+  transform: translateX(2px);
 }
 
 .tile.insert-after {
-  transform: translateY(-2px);
+  transform: translateX(-2px);
 }
 
 .tile.insert-before::before,
 .tile.insert-after::after {
   content: "";
   position: absolute;
-  left: 8px;
-  right: 8px;
-  height: 3px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
   border-radius: 999px;
   background: var(--accent);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 
 .tile.insert-before::before {
-  top: -6px;
+  left: -6px;
 }
 
 .tile.insert-after::after {
-  bottom: -6px;
+  right: -6px;
 }
 
 .dropzone.active {

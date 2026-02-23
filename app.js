@@ -167,7 +167,7 @@ for (const zone of zones) {
     }
 
     const rect = targetTile.getBoundingClientRect();
-    const placeAfter = event.clientY > rect.top + rect.height / 2;
+    const placeAfter = event.clientX > rect.left + rect.width / 2;
     targetTile.classList.add(placeAfter ? "insert-after" : "insert-before");
     dropHint = { zoneName: zone.dataset.zone, targetId: targetTile.dataset.id, placeAfter };
   });
