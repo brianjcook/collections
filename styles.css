@@ -1,0 +1,142 @@
+:root {
+  --bg: #f8f6ef;
+  --text: #1d1d1d;
+  --panel: #fff;
+  --line: #d8d8d8;
+  --yellow: #f8de6f;
+  --green: #a9d08e;
+  --blue: #86b7ff;
+  --purple: #c8a2ff;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #fff9dd, var(--bg) 40%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.topbar h1 { margin: 0 0 4px; }
+.subtitle { margin: 0; color: #444; }
+
+.controls, .manual {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.controls {
+  grid-template-columns: repeat(2, max-content) 1fr;
+  align-items: center;
+}
+
+button {
+  border: 1px solid #888;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover { background: #f1f1f1; }
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.board {
+  display: grid;
+  gap: 14px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.tiles {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  border: 1px solid #8f8f8f;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: grab;
+  padding: 6px;
+  user-select: none;
+  width: 100%;
+}
+
+.tile.selected {
+  outline: 2px solid #222;
+  outline-offset: 1px;
+}
+
+.tile.dragging {
+  opacity: 0.5;
+}
+
+.dropzone.active {
+  outline: 2px dashed #5b5b5b;
+  outline-offset: 3px;
+}
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.group.yellow { background: color-mix(in oklab, var(--yellow) 26%, white); }
+.group.green { background: color-mix(in oklab, var(--green) 26%, white); }
+.group.blue { background: color-mix(in oklab, var(--blue) 26%, white); }
+.group.purple { background: color-mix(in oklab, var(--purple) 26%, white); }
+
+#status {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+@media (max-width: 780px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .groups {
+    grid-template-columns: 1fr;
+  }
+}
