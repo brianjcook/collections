@@ -4,25 +4,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Collections</title>
+  <link rel="stylesheet" href="https://use.typekit.net/umi6cye.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
+  <div class="tcb-flags" aria-hidden="true">
+    <a href="https://www.thecookblog.com"><div class="flag c"></div></a>
+    <a href="https://www.thecookblog.com"><div class="flag o"></div></a>
+    <a href="https://www.thecookblog.com"><div class="flag o"></div></a>
+    <a href="https://www.thecookblog.com"><div class="flag k"></div></a>
+  </div>
+
+  <main class="page">
+    <header class="hero">
       <h1>Collections</h1>
-      <p class="subtitle">Drag words into Yellow, Green, Blue, and Purple groups.</p>
+      <p class="subhead">Rearrange NYT Connections words into Yellow, Green, Blue, and Purple groups.</p>
     </header>
 
     <section class="controls" aria-label="Data controls">
-      <button id="fetchTodayBtn" type="button">Load Today's Puzzle</button>
-      <button id="resetBtn" type="button">Reset Layout</button>
+      <button id="fetchTodayBtn" type="button" class="primary">Load Today's Puzzle</button>
+      <button id="resetBtn" type="button" class="ghost">Reset Layout</button>
       <p id="status" role="status" aria-live="polite"></p>
     </section>
 
     <section class="manual" aria-label="Manual word entry">
       <label for="manualWords">Paste 16 words (comma, newline, or space separated) if auto-fetch fails:</label>
       <textarea id="manualWords" rows="3" placeholder="WORD1, WORD2, WORD3, ..."></textarea>
-      <button id="loadManualBtn" type="button">Load Pasted Words</button>
+      <button id="loadManualBtn" type="button" class="ghost">Load Pasted Words</button>
     </section>
 
     <section class="board" aria-label="Word board">

@@ -1,38 +1,142 @@
+@import url("https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700&display=swap");
+
 :root {
-  --bg: #f8f6ef;
-  --text: #1d1d1d;
-  --panel: #fff;
-  --line: #d8d8d8;
-  --yellow: #f8de6f;
-  --green: #a9d08e;
-  --blue: #86b7ff;
-  --purple: #c8a2ff;
+  color-scheme: light;
+  --bg: #f7f4ef;
+  --bg-accent: #f0e6d6;
+  --ink: #1d1b16;
+  --muted: #5b544b;
+  --panel: #ffffff;
+  --accent: #c45f2a;
+  --accent-dark: #8f3f1b;
+  --line: #e5d9c8;
+  --yellow: #f5df7b;
+  --green: #b6d98a;
+  --blue: #8ab4ff;
+  --purple: #c7a7f4;
+  --shadow: 0 24px 50px rgba(29, 27, 22, 0.12);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #fff9dd, var(--bg) 40%);
-  color: var(--text);
+  color: var(--ink);
+  font-family: "interstate-mono", monospace;
+  font-size: 100%;
+  font-weight: 300;
+  background:
+    radial-gradient(circle at top left, #fff5e6 0%, var(--bg) 40%),
+    repeating-linear-gradient(45deg, rgba(196, 95, 42, 0.08) 0 6px, rgba(255, 255, 255, 0) 6px 12px);
 }
 
-.app {
+.tcb-flags {
+  text-align: center;
+  margin: 1em auto 0.25em;
+  display: flex;
+  justify-content: center;
+}
+
+.flag {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  padding: 4px;
+  margin: 2px;
+  border: 1px solid #eee;
+}
+
+.flag::before,
+.flag::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.c {
+  background: #152536;
+}
+
+.c::before {
+  top: 20%;
+  bottom: 20%;
+  background: #faf7f4;
+}
+
+.c::after {
+  top: 40%;
+  bottom: 40%;
+  background: #f2916b;
+}
+
+.o {
+  background: #f2916b;
+}
+
+.o::before {
+  background: #ffe882;
+  right: 35%;
+  bottom: -100%;
+  transform: rotate(-45deg);
+  left: -100%;
+}
+
+.k {
+  background: #ffe882;
+}
+
+.k::before {
+  background: #152536;
+  left: 50%;
+}
+
+.page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 24px 32px;
   display: grid;
   gap: 16px;
 }
 
-.topbar h1 { margin: 0 0 4px; }
-.subtitle { margin: 0; color: #444; }
+.hero {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 6px;
+}
 
-.controls, .manual {
+h1 {
+  margin: 0;
+  font-family: "matrix-ii-ext-semi-narrow", serif;
+  font-size: 3rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.subhead {
+  max-width: 760px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: #726969;
+}
+
+.controls,
+.manual,
+.panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.controls,
+.manual {
+  padding: 14px;
   display: grid;
   gap: 10px;
 }
@@ -43,21 +147,51 @@ body {
 }
 
 button {
-  border: 1px solid #888;
-  background: #fff;
+  border: 1px solid transparent;
   border-radius: 10px;
   padding: 8px 12px;
-  font-size: 14px;
+  font-family: "interstate-mono", monospace;
+  font-size: 13px;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-button:hover { background: #f1f1f1; }
+button:hover {
+  transform: translateY(-1px);
+}
+
+.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary:hover {
+  background: var(--accent-dark);
+}
+
+.ghost {
+  background: #fff;
+  border-color: #cab9a2;
+  color: var(--ink);
+}
+
+.ghost:hover {
+  background: #faf7f2;
+}
+
 textarea {
   width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 8px;
+  border: 1px solid #d9cdbd;
+  border-radius: 10px;
+  padding: 10px;
   resize: vertical;
+  font-family: "interstate-mono", monospace;
+  font-size: 13px;
+}
+
+label {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .board {
@@ -66,15 +200,14 @@ textarea {
 }
 
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
   padding: 12px;
 }
 
 .panel h2 {
   margin: 0 0 10px;
+  font-family: "Libre Franklin", system-ui, sans-serif;
   font-size: 18px;
+  font-weight: 700;
 }
 
 .tiles {
@@ -85,32 +218,38 @@ textarea {
 }
 
 .tile {
-  border: 1px solid #8f8f8f;
-  background: #fff;
+  width: 100%;
+  border: 1px solid #d6c8b8;
+  background: #fffdf9;
+  color: var(--ink);
   border-radius: 8px;
-  min-height: 42px;
+  min-height: 44px;
   display: grid;
   place-items: center;
   text-align: center;
-  font-weight: 600;
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-weight: 700;
   letter-spacing: 0.2px;
   cursor: grab;
   padding: 6px;
   user-select: none;
-  width: 100%;
+}
+
+.tile:active {
+  cursor: grabbing;
 }
 
 .tile.selected {
-  outline: 2px solid #222;
-  outline-offset: 1px;
+  border-color: var(--accent);
+  box-shadow: 0 8px 18px rgba(196, 95, 42, 0.2);
 }
 
 .tile.dragging {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 .dropzone.active {
-  outline: 2px dashed #5b5b5b;
+  outline: 2px dashed var(--accent);
   outline-offset: 3px;
 }
 
@@ -120,18 +259,33 @@ textarea {
   gap: 12px;
 }
 
-.group.yellow { background: color-mix(in oklab, var(--yellow) 26%, white); }
-.group.green { background: color-mix(in oklab, var(--green) 26%, white); }
-.group.blue { background: color-mix(in oklab, var(--blue) 26%, white); }
-.group.purple { background: color-mix(in oklab, var(--purple) 26%, white); }
+.group.yellow {
+  background: color-mix(in oklab, var(--yellow) 28%, white);
+}
+
+.group.green {
+  background: color-mix(in oklab, var(--green) 28%, white);
+}
+
+.group.blue {
+  background: color-mix(in oklab, var(--blue) 28%, white);
+}
+
+.group.purple {
+  background: color-mix(in oklab, var(--purple) 28%, white);
+}
 
 #status {
   margin: 0;
-  color: #333;
-  font-size: 14px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 @media (max-width: 780px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+
   .controls {
     grid-template-columns: 1fr;
   }
