@@ -20,3 +20,12 @@ Push to `main` and GitHub Actions will deploy files to:
 - `https://thecookblog.com/tools/collections/`
 
 You can also run the workflow manually from Actions: `Deploy Collections to FTP`.
+
+## 3) Daily puzzle data update
+
+This repo includes a second workflow, `Update Connections Data`, that runs daily and writes:
+
+- `data/connections-YYYY-MM-DD.json`
+- `data/connections-latest.json`
+
+Those commits to `main` automatically trigger deploy, so the app can auto-load same-origin puzzle data without browser CORS issues.

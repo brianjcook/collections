@@ -159,28 +159,12 @@ function formatDateUTC(d) {
   return `${year}-${month}-${day}`;
 }
 
-async function fetchTodayWords() {
-  const today = new Date();
-  const dateStr = formatDateUTC(today);
-
-  // Use same-origin proxy to avoid browser CORS blocks from NYT.
-  const url = `nyt-proxy.php?date=${encodeURIComponent(dateStr)}`;
-  const response = await fetch(url, { credentials: "same-origin" });
-  if (!response.ok) {
-    let message = `HTTP ${response.status}`;
-    try {
-      const err = await response.json();
-      if (err?.error) {
-        message = `${message}: ${err.error}`;
-      }
-    } catch (_) {
-      // Keep generic message if response is not JSON.
-    }
-    throw new Error(message);
-  }
-
-  const data = await response.json();
+function extractWordsFromPayload(data) {
   const candidates = [];
+
+  if (Array.isArray(data)) {
+    candidates.push(...data);
+  }
 
   if (Array.isArray(data?.words)) {
     candidates.push(...data.words);
@@ -202,12 +186,39 @@ async function fetchTodayWords() {
   return words.slice(0, 16);
 }
 
+async function fetchJson(url) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+async function fetchTodayWords() {
+  const today = new Date();
+  const dateStr = formatDateUTC(today);
+  const cacheBust = Date.now();
+  const datedUrl = `data/connections-${dateStr}.json?v=${cacheBust}`;
+  const latestUrl = `data/connections-latest.json?v=${cacheBust}`;
+
+  try {
+    const datedData = await fetchJson(datedUrl);
+    return extractWordsFromPayload(datedData);
+  } catch (_) {
+    const latestData = await fetchJson(latestUrl);
+    return extractWordsFromPayload(latestData);
+  }
+}
+
 fetchTodayBtn.addEventListener("click", async () => {
-  setStatus("Loading today's words from NYT...");
+  setStatus("Loading today's words...");
   try {
     const words = await fetchTodayWords();
     setWords(words);
-    setStatus("Loaded today's puzzle words from NYT.");
+    setStatus("Loaded today's puzzle words.");
   } catch (err) {
     setStatus(`Auto-fetch failed (${err.message}). Paste words manually below.`);
   }
