@@ -6,6 +6,7 @@ const state = {
 
 const statusEl = document.getElementById("status");
 const manualWordsEl = document.getElementById("manualWords");
+const manualPanelEl = document.getElementById("manualPanel");
 const fetchTodayBtn = document.getElementById("fetchTodayBtn");
 const loadManualBtn = document.getElementById("loadManualBtn");
 const resetBtn = document.getElementById("resetBtn");
@@ -15,6 +16,18 @@ let dragId = null;
 
 function setStatus(text) {
   statusEl.textContent = text;
+}
+
+function openManualPanel() {
+  if (manualPanelEl) {
+    manualPanelEl.open = true;
+  }
+}
+
+function closeManualPanel() {
+  if (manualPanelEl) {
+    manualPanelEl.open = false;
+  }
 }
 
 function normalizeWords(words) {
@@ -135,11 +148,13 @@ loadManualBtn.addEventListener("click", () => {
   const words = wordsFromText(manualWordsEl.value);
   if (words.length !== 16) {
     setStatus(`Manual input has ${words.length} words. Please provide exactly 16.`);
+    openManualPanel();
     return;
   }
 
   setWords(words);
   setStatus("Loaded words from manual input.");
+  closeManualPanel();
 });
 
 resetBtn.addEventListener("click", () => {
@@ -240,8 +255,10 @@ fetchTodayBtn.addEventListener("click", async () => {
     const words = await fetchTodayWords();
     setWords(words);
     setStatus("Loaded today's puzzle words.");
+    closeManualPanel();
   } catch (err) {
-    setStatus(`Auto-fetch failed (${err.message}). Paste words manually below.`);
+    setStatus(`Auto-fetch failed (${err.message}). Open Manual Import below.`);
+    openManualPanel();
   }
 });
 

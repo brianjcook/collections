@@ -27,10 +27,9 @@
       <p id="status" role="status" aria-live="polite"></p>
     </section>
 
-    <section class="manual" aria-label="Manual word entry">
-      <label for="manualWords">Paste 16 words (comma, newline, or space separated) if auto-fetch fails:</label>
-      <textarea id="manualWords" rows="3" placeholder="WORD1, WORD2, WORD3, ..."></textarea>
-      <button id="loadManualBtn" type="button" class="ghost">Load Pasted Words</button>
+    <section class="hint-bar" aria-label="How to use">
+      <span class="hint-pill">Drag and drop words between groups</span>
+      <span class="hint-pill">On touch devices: tap a word, then tap a group</span>
     </section>
 
     <section class="board" aria-label="Word board">
@@ -58,8 +57,17 @@
         </section>
       </div>
     </section>
+
+    <details class="manual" id="manualPanel">
+      <summary>Manual Import</summary>
+      <div class="manual-body" aria-label="Manual word entry">
+        <label for="manualWords">Paste exactly 16 words (comma, newline, or space separated):</label>
+        <textarea id="manualWords" rows="3" placeholder="WORD1, WORD2, WORD3, ..."></textarea>
+        <button id="loadManualBtn" type="button" class="ghost">Load Pasted Words</button>
+      </div>
+    </details>
   </main>
 
-  <script src="app.js?v=20260223b"></script>
+  <script src="app.js?v=20260223c"></script>
 </body>
 </html>
