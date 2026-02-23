@@ -125,7 +125,6 @@ h1 {
   color: #726969;
 }
 
-.controls,
 .manual,
 .panel {
   background: var(--panel);
@@ -134,22 +133,16 @@ h1 {
   box-shadow: var(--shadow);
 }
 
-.controls,
 .manual {
   padding: 14px;
   display: grid;
   gap: 10px;
 }
 
-.controls {
-  grid-template-columns: repeat(2, max-content) 1fr;
-  align-items: center;
-}
-
 .hint-bar {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
 }
 
@@ -309,6 +302,18 @@ label {
   font-size: 12px;
 }
 
+.status-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.status-wrap #status {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid #ddcfbd;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
 .manual {
   margin-top: 4px;
 }
@@ -340,13 +345,21 @@ label {
   gap: 10px;
 }
 
+.manual-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.manual-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 @media (max-width: 780px) {
   h1 {
     font-size: 2.5rem;
-  }
-
-  .controls {
-    grid-template-columns: 1fr;
   }
 
   .groups {
