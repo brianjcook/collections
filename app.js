@@ -1,6 +1,13 @@
 const state = {
   tiles: [],
   zoneById: new Map(),
+  zoneOrder: {
+    pool: [],
+    yellow: [],
+    green: [],
+    blue: [],
+    purple: [],
+  },
   selectedId: null,
 };
 
@@ -41,17 +48,42 @@ function setWords(words) {
   const normalized = normalizeWords(words).slice(0, 16);
   state.tiles = normalized.map((text, index) => ({ id: `w${index + 1}`, text }));
   state.zoneById.clear();
+  state.zoneOrder.pool = [];
+  state.zoneOrder.yellow = [];
+  state.zoneOrder.green = [];
+  state.zoneOrder.blue = [];
+  state.zoneOrder.purple = [];
   state.selectedId = null;
 
   for (const tile of state.tiles) {
     state.zoneById.set(tile.id, "pool");
+    state.zoneOrder.pool.push(tile.id);
   }
 
   render();
 }
 
-function moveTileToZone(tileId, zoneName) {
+function removeFromCurrentZone(tileId) {
+  const currentZone = state.zoneById.get(tileId);
+  if (!currentZone || !state.zoneOrder[currentZone]) return;
+  state.zoneOrder[currentZone] = state.zoneOrder[currentZone].filter((id) => id !== tileId);
+}
+
+function moveTileToZone(tileId, zoneName, targetId = null, placeAfter = false) {
   if (!tileId || !state.zoneById.has(tileId)) return;
+  if (!state.zoneOrder[zoneName]) return;
+
+  removeFromCurrentZone(tileId);
+  const targetOrder = state.zoneOrder[zoneName];
+
+  if (targetId && targetOrder.includes(targetId)) {
+    let insertIndex = targetOrder.indexOf(targetId);
+    if (placeAfter) insertIndex += 1;
+    targetOrder.splice(insertIndex, 0, tileId);
+  } else {
+    targetOrder.push(tileId);
+  }
+
   state.zoneById.set(tileId, zoneName);
   state.selectedId = null;
   render();
@@ -62,40 +94,46 @@ function render() {
     zone.innerHTML = "";
   }
 
-  for (const tileModel of state.tiles) {
-    const zoneName = state.zoneById.get(tileModel.id) || "pool";
-    const zoneEl = document.querySelector(`.dropzone[data-zone="${zoneName}"]`);
-    if (!zoneEl) continue;
+  const tilesById = new Map(state.tiles.map((tile) => [tile.id, tile]));
 
-    const tile = document.createElement("button");
-    tile.type = "button";
-    tile.className = "tile";
-    tile.textContent = tileModel.text;
-    tile.draggable = true;
-    tile.dataset.id = tileModel.id;
+  for (const zone of zones) {
+    const zoneName = zone.dataset.zone;
+    const orderedIds = state.zoneOrder[zoneName] || [];
 
-    if (state.selectedId === tileModel.id) {
-      tile.classList.add("selected");
+    for (const tileId of orderedIds) {
+      const tileModel = tilesById.get(tileId);
+      if (!tileModel) continue;
+
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "tile";
+      tile.textContent = tileModel.text;
+      tile.draggable = true;
+      tile.dataset.id = tileModel.id;
+
+      if (state.selectedId === tileModel.id) {
+        tile.classList.add("selected");
+      }
+
+      tile.addEventListener("click", () => {
+        state.selectedId = state.selectedId === tileModel.id ? null : tileModel.id;
+        render();
+      });
+
+      tile.addEventListener("dragstart", (event) => {
+        dragId = tileModel.id;
+        tile.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", tileModel.id);
+      });
+
+      tile.addEventListener("dragend", () => {
+        dragId = null;
+        tile.classList.remove("dragging");
+      });
+
+      zone.appendChild(tile);
     }
-
-    tile.addEventListener("click", () => {
-      state.selectedId = state.selectedId === tileModel.id ? null : tileModel.id;
-      render();
-    });
-
-    tile.addEventListener("dragstart", (event) => {
-      dragId = tileModel.id;
-      tile.classList.add("dragging");
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", tileModel.id);
-    });
-
-    tile.addEventListener("dragend", () => {
-      dragId = null;
-      tile.classList.remove("dragging");
-    });
-
-    zoneEl.appendChild(tile);
   }
 }
 
@@ -115,6 +153,15 @@ for (const zone of zones) {
 
     const droppedId = dragId || event.dataTransfer.getData("text/plain");
     const zoneName = zone.dataset.zone;
+    const targetTile = event.target.closest(".tile");
+
+    if (targetTile && targetTile.dataset.id && targetTile.dataset.id !== droppedId) {
+      const rect = targetTile.getBoundingClientRect();
+      const placeAfter = event.clientY > rect.top + rect.height / 2;
+      moveTileToZone(droppedId, zoneName, targetTile.dataset.id, placeAfter);
+      return;
+    }
+
     moveTileToZone(droppedId, zoneName);
   });
 
@@ -159,9 +206,12 @@ loadManualBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", () => {
   if (!state.tiles.length) return;
-  for (const tile of state.tiles) {
-    state.zoneById.set(tile.id, "pool");
-  }
+  state.zoneOrder.pool = state.tiles.map((tile) => tile.id);
+  state.zoneOrder.yellow = [];
+  state.zoneOrder.green = [];
+  state.zoneOrder.blue = [];
+  state.zoneOrder.purple = [];
+  for (const tile of state.tiles) state.zoneById.set(tile.id, "pool");
   state.selectedId = null;
   render();
   setStatus("Layout reset. All words moved back to Word Pool.");
