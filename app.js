@@ -20,6 +20,7 @@ const resetBtn = document.getElementById("resetBtn");
 
 const zones = Array.from(document.querySelectorAll(".dropzone"));
 let dragId = null;
+let dropHint = null;
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -35,6 +36,16 @@ function closeManualPanel() {
   if (manualPanelEl) {
     manualPanelEl.open = false;
   }
+}
+
+function clearDropIndicators() {
+  for (const zone of zones) {
+    zone.classList.remove("active");
+  }
+  for (const tile of document.querySelectorAll(".tile.insert-before, .tile.insert-after")) {
+    tile.classList.remove("insert-before", "insert-after");
+  }
+  dropHint = null;
 }
 
 function normalizeWords(words) {
@@ -130,6 +141,7 @@ function render() {
       tile.addEventListener("dragend", () => {
         dragId = null;
         tile.classList.remove("dragging");
+        clearDropIndicators();
       });
 
       zone.appendChild(tile);
@@ -141,28 +153,47 @@ for (const zone of zones) {
   zone.addEventListener("dragover", (event) => {
     event.preventDefault();
     zone.classList.add("active");
+
+    if (!dragId) return;
+
+    for (const tile of zone.querySelectorAll(".tile.insert-before, .tile.insert-after")) {
+      tile.classList.remove("insert-before", "insert-after");
+    }
+
+    const targetTile = event.target.closest(".tile");
+    if (!targetTile || !targetTile.dataset.id || targetTile.dataset.id === dragId) {
+      dropHint = { zoneName: zone.dataset.zone, targetId: null, placeAfter: false };
+      return;
+    }
+
+    const rect = targetTile.getBoundingClientRect();
+    const placeAfter = event.clientY > rect.top + rect.height / 2;
+    targetTile.classList.add(placeAfter ? "insert-after" : "insert-before");
+    dropHint = { zoneName: zone.dataset.zone, targetId: targetTile.dataset.id, placeAfter };
   });
 
-  zone.addEventListener("dragleave", () => {
+  zone.addEventListener("dragleave", (event) => {
+    if (event.relatedTarget && zone.contains(event.relatedTarget)) return;
     zone.classList.remove("active");
+    for (const tile of zone.querySelectorAll(".tile.insert-before, .tile.insert-after")) {
+      tile.classList.remove("insert-before", "insert-after");
+    }
   });
 
   zone.addEventListener("drop", (event) => {
     event.preventDefault();
-    zone.classList.remove("active");
-
     const droppedId = dragId || event.dataTransfer.getData("text/plain");
-    const zoneName = zone.dataset.zone;
-    const targetTile = event.target.closest(".tile");
+    const hintedZone = dropHint?.zoneName || zone.dataset.zone;
+    const hintedTarget = dropHint?.targetId || null;
+    const hintedAfter = Boolean(dropHint?.placeAfter);
+    clearDropIndicators();
 
-    if (targetTile && targetTile.dataset.id && targetTile.dataset.id !== droppedId) {
-      const rect = targetTile.getBoundingClientRect();
-      const placeAfter = event.clientY > rect.top + rect.height / 2;
-      moveTileToZone(droppedId, zoneName, targetTile.dataset.id, placeAfter);
+    if (hintedTarget && hintedTarget !== droppedId) {
+      moveTileToZone(droppedId, hintedZone, hintedTarget, hintedAfter);
       return;
     }
 
-    moveTileToZone(droppedId, zoneName);
+    moveTileToZone(droppedId, hintedZone);
   });
 
   // Mobile/touch fallback: tap a tile, then tap a zone to move it.
