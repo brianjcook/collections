@@ -161,6 +161,7 @@ function formatDateUTC(d) {
 
 function extractWordsFromPayload(data) {
   const candidates = [];
+  const positionedCandidates = [];
 
   if (Array.isArray(data)) {
     candidates.push(...data);
@@ -176,6 +177,26 @@ function extractWordsFromPayload(data) {
         candidates.push(...card.members);
       }
     }
+  }
+
+  if (Array.isArray(data?.categories)) {
+    for (const category of data.categories) {
+      if (!Array.isArray(category?.cards)) continue;
+      for (const card of category.cards) {
+        const content = card?.content;
+        if (!content) continue;
+        if (Number.isInteger(card?.position)) {
+          positionedCandidates.push([card.position, content]);
+        } else {
+          candidates.push(content);
+        }
+      }
+    }
+  }
+
+  if (positionedCandidates.length) {
+    positionedCandidates.sort((a, b) => a[0] - b[0]);
+    candidates.push(...positionedCandidates.map((item) => item[1]));
   }
 
   const words = normalizeWords(candidates);

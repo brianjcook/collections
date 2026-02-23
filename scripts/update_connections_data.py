@@ -39,6 +39,7 @@ def fetch_nyt_payload(date_str: str) -> dict:
 
 def extract_words(payload: dict) -> list[str]:
     words: list[str] = []
+    positioned: list[tuple[int, str]] = []
 
     if isinstance(payload.get("words"), list):
         words.extend(str(w).strip().upper() for w in payload["words"])
@@ -50,9 +51,35 @@ def extract_words(payload: dict) -> list[str]:
             if isinstance(members, list):
                 words.extend(str(w).strip().upper() for w in members)
 
+    categories = payload.get("categories")
+    if isinstance(categories, list):
+        for category in categories:
+            if not isinstance(category, dict):
+                continue
+            cat_cards = category.get("cards")
+            if not isinstance(cat_cards, list):
+                continue
+            for card in cat_cards:
+                if not isinstance(card, dict):
+                    continue
+                content = str(card.get("content", "")).strip().upper()
+                if not content:
+                    continue
+                if isinstance(card.get("position"), int):
+                    positioned.append((int(card["position"]), content))
+                else:
+                    words.append(content)
+
+    if positioned:
+        positioned.sort(key=lambda item: item[0])
+        words.extend(content for _, content in positioned)
+
     words = [w for w in words if w]
     if len(words) < 16:
-        raise RuntimeError(f"Expected at least 16 words, got {len(words)}")
+        top_keys = ", ".join(payload.keys()) if isinstance(payload, dict) else "non-dict payload"
+        raise RuntimeError(
+            f"Expected at least 16 words, got {len(words)}. Top-level keys: {top_keys}"
+        )
     return words[:16]
 
 
