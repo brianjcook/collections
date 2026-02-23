@@ -217,9 +217,11 @@ label {
 
 .panel h2 {
   margin: 0 0 10px;
-  font-family: "Libre Franklin", system-ui, sans-serif;
-  font-size: 18px;
+  font-family: "interstate-mono", monospace;
+  text-transform: uppercase;
+  font-size: 14px;
   font-weight: 700;
+  color: #726969;
 }
 
 .tiles {
