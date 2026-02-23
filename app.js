@@ -22,6 +22,12 @@ const zones = Array.from(document.querySelectorAll(".dropzone"));
 let dragId = null;
 let dropHint = null;
 
+function trackEvent(name, params = {}) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", name, params);
+  }
+}
+
 function setStatus(text) {
   statusEl.textContent = text;
 }
@@ -80,10 +86,16 @@ function removeFromCurrentZone(tileId) {
   state.zoneOrder[currentZone] = state.zoneOrder[currentZone].filter((id) => id !== tileId);
 }
 
-function moveTileToZone(tileId, zoneName, targetId = null, placeAfter = false) {
+function getTileText(tileId) {
+  return state.tiles.find((tile) => tile.id === tileId)?.text || "";
+}
+
+function moveTileToZone(tileId, zoneName, targetId = null, placeAfter = false, inputMode = "unknown") {
   if (!tileId || !state.zoneById.has(tileId)) return;
   if (!state.zoneOrder[zoneName]) return;
 
+  const fromZone = state.zoneById.get(tileId);
+  const fromIndex = state.zoneOrder[fromZone]?.indexOf(tileId) ?? -1;
   removeFromCurrentZone(tileId);
   const targetOrder = state.zoneOrder[zoneName];
 
@@ -96,8 +108,20 @@ function moveTileToZone(tileId, zoneName, targetId = null, placeAfter = false) {
   }
 
   state.zoneById.set(tileId, zoneName);
+  const toIndex = targetOrder.indexOf(tileId);
+  const didChange = fromZone !== zoneName || fromIndex !== toIndex;
   state.selectedId = null;
   render();
+
+  if (didChange) {
+    trackEvent("tile_move", {
+      from_zone: fromZone,
+      to_zone: zoneName,
+      is_reorder: fromZone === zoneName,
+      input_mode: inputMode,
+      word_text: getTileText(tileId),
+    });
+  }
 }
 
 function render() {
@@ -189,17 +213,17 @@ for (const zone of zones) {
     clearDropIndicators();
 
     if (hintedTarget && hintedTarget !== droppedId) {
-      moveTileToZone(droppedId, hintedZone, hintedTarget, hintedAfter);
+      moveTileToZone(droppedId, hintedZone, hintedTarget, hintedAfter, "drag");
       return;
     }
 
-    moveTileToZone(droppedId, hintedZone);
+    moveTileToZone(droppedId, hintedZone, null, false, "drag");
   });
 
   // Mobile/touch fallback: tap a tile, then tap a zone to move it.
   zone.addEventListener("click", () => {
     if (!state.selectedId) return;
-    moveTileToZone(state.selectedId, zone.dataset.zone);
+    moveTileToZone(state.selectedId, zone.dataset.zone, null, false, "tap");
   });
 }
 
@@ -227,11 +251,23 @@ loadManualBtn.addEventListener("click", () => {
   if (words.length !== 16) {
     setStatus(`Manual input has ${words.length} words. Please provide exactly 16.`);
     openManualPanel();
+    trackEvent("manual_import_submitted", {
+      result: "invalid_count",
+      word_count: words.length,
+    });
     return;
   }
 
   setWords(words);
   setStatus("Loaded words from manual input.");
+  trackEvent("manual_import_submitted", {
+    result: "success",
+    word_count: words.length,
+  });
+  trackEvent("puzzle_loaded", {
+    load_method: "manual_paste",
+    word_count: words.length,
+  });
   closeManualPanel();
 });
 
@@ -246,6 +282,10 @@ resetBtn.addEventListener("click", () => {
   state.selectedId = null;
   render();
   setStatus("Layout reset. All words moved back to Word Pool.");
+  trackEvent("layout_reset", {
+    had_words_loaded: state.tiles.length > 0,
+    word_count: state.tiles.length,
+  });
 });
 
 function formatDateUTC(d) {
@@ -330,19 +370,45 @@ async function fetchTodayWords() {
   }
 }
 
-fetchTodayBtn.addEventListener("click", async () => {
+async function loadToday(trigger = "user_click") {
+  const requestedDate = formatDateUTC(new Date());
   setStatus("Loading today's words...");
+  trackEvent("puzzle_autoload_attempt", {
+    trigger,
+    date_requested: requestedDate,
+  });
+
   try {
     const words = await fetchTodayWords();
     setWords(words);
     setStatus("Loaded today's puzzle words.");
+    trackEvent("puzzle_autoload_attempt", {
+      trigger,
+      date_requested: requestedDate,
+      result: "success",
+    });
+    trackEvent("puzzle_loaded", {
+      load_method: trigger === "auto_init" ? "auto_today" : "reload",
+      word_count: words.length,
+    });
     closeManualPanel();
   } catch (err) {
-    setStatus(`Auto-fetch failed (${err.message}). Open Manual Import below.`);
+    setStatus(`Auto-fetch failed (${err.message}). Open Puzzle Tools below.`);
+    trackEvent("puzzle_autoload_attempt", {
+      trigger,
+      date_requested: requestedDate,
+      result: "failure",
+      failure_reason: String(err.message || "unknown_error"),
+    });
+    trackEvent("manual_import_opened", { trigger: "auto_fetch_failed" });
     openManualPanel();
   }
+}
+
+fetchTodayBtn.addEventListener("click", async () => {
+  await loadToday("user_click");
 });
 
 (async function init() {
-  fetchTodayBtn.click();
+  await loadToday("auto_init");
 })();
