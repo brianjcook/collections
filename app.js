@@ -288,11 +288,20 @@ resetBtn.addEventListener("click", () => {
   });
 });
 
-function formatDateUTC(d) {
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function formatDateNY(d) {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  } catch (_) {
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 }
 
 function extractWordsFromPayload(data) {
@@ -356,7 +365,7 @@ async function fetchJson(url) {
 
 async function fetchTodayWords() {
   const today = new Date();
-  const dateStr = formatDateUTC(today);
+  const dateStr = formatDateNY(today);
   const cacheBust = Date.now();
   const datedUrl = `data/connections-${dateStr}.json?v=${cacheBust}`;
   const latestUrl = `data/connections-latest.json?v=${cacheBust}`;
@@ -371,7 +380,7 @@ async function fetchTodayWords() {
 }
 
 async function loadToday(trigger = "user_click") {
-  const requestedDate = formatDateUTC(new Date());
+  const requestedDate = formatDateNY(new Date());
   setStatus("Loading today's words...");
   trackEvent("puzzle_autoload_attempt", {
     trigger,
