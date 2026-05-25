@@ -32,7 +32,16 @@ jobs:
             exit 0
           fi
           git commit -m "Update Connections data"
-          git push
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "git push failed on attempt ${attempt}; rebasing before retry."
+            git pull --rebase origin main
+            sleep 10
+          done
+          echo "git push failed after 3 attempts."
+          exit 1
 
       - name: Deploy updated data via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
